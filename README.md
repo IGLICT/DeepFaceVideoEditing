@@ -1,4 +1,4 @@
-# DeepFaceVideoEditing: Sketch-based Deep Editing of Face Videos<br><sub>Official PyTorch implementation</sub>
+# DeepFaceVideoEditing: Sketch-based Deep Editing of Face Videos<br><sub>Official implementation</sub>
 
 ![Teaser image](./img/teaser.jpg)
 
