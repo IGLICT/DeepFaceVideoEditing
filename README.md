@@ -11,7 +11,7 @@ Sketches, which are simple and concise, have been used in recent deep image synt
 
 　- Ubuntu 16.04 or later
 
-　- NVIDIA GPU RTX 3090 + CUDA 11.1
+　- NVIDIA GPU RTX 3090 + CUDA 11.1 + cudnn 8.0.4
 
 2. Software
 
@@ -86,6 +86,8 @@ Extract and align all frames from input video.
   python video_align.py
   ```
 
+The generated aligned frames will be in `align_frames` directory for each example. 
+
 ### PTI training
 In order to recontruct input video, use PTI method to finetune StyleGAN3 generator. 
 
@@ -93,11 +95,15 @@ In order to recontruct input video, use PTI method to finetune StyleGAN3 generat
   python run_pti_stylegan3.py
   ```
 
+PTI weights will be generated in example directory and pti results for 1st frame will be generated in `pti_results` directory. 
+
 ### Sketch editing
 
 Generate the sketch editing results for single frame. 
 
 **Modify the `./configs/paths_config.py`**: change the `inversion_edit_path` to sketch editing directory which contains image, sketch and mask. 
+
+The edit frame is named `img.jpg`, drawn sketch is named `sketch_edit.jpg` and drawn mask is named `mask_edit.jpg`. 
 
 Then, generate sketch optimization results: 
 
@@ -105,7 +111,13 @@ Then, generate sketch optimization results:
   python run_sketch.py
   ```
 
-The sketch weights and RGB weights could be tuned in `./configs/hyperparameters.py` to generate the better results. 
+The edited results will be generated in `inversion_edit_path` directory, including `initial_w.pkl`, `refine_w.pkl`, `refine.jpg` and `mask_fusion_result.jpg`. 
+
+Note:
+
+-- The sketch weights and RGB weights could be tuned in `./configs/hyperparameters.py` to generate the better results. 
+
+-- And for each editing operations, this script should be run again with different `./configs/paths_config.py`. For example, this script should be run 3 times if 3 editing operations are applied for a single video. Please read the `readme.txt` for each example. 
 
 ### Editing propagation
 Before propagating the editing effect, the editing vectors should be generated using the above approach. 
@@ -124,12 +136,16 @@ Then, generate the propagation results:
   python run_editing.py
   ```
 
+Edited frames will be saved in `edit/edit_video` directory.
+
 ### Face Merging and realignment
 Merge the face regions and realign generated frames into original frames. 
 
   ```
   python video_merge.py
   ```
+
+Merged frames will be saved in `merge_images` directory. Final edited videos will be generated named as `merged.mp4`. 
 
 ## Citation
 
