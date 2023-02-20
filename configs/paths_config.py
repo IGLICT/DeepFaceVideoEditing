@@ -11,15 +11,12 @@ multi_id_model_type = 'multi_id'
 ## Input Videos name
 video_name = 'ori.mp4'
 ## Input Vides directory
-input_video_path = './video_editings/example1/'
-## Optimize editing directory
-inversion_edit_path = 'edit/baseShape/edit1/'
-#inversion_edit_path = 'edit/window/edit1/'
+input_video_path = './video_editings/example2/'
 
 ## propagation and fusion operations, list of folders in 
 ## If no operation is applied, just set the list empty. 
 #---------------------BaseShape editing---------------------
-shapePath_list = ['edit1']
+shapePath_list = ['edit1', 'edit2']
 #------------------Expression guidance editing---------------------
 # If has editing operations:
 # At least two folders, one with editing operation, another without editing in natural expression
