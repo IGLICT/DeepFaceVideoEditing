@@ -52,16 +52,16 @@ Put the weights into `./modules/face_recon_jittor/checkpoints/`. [Basel Face Mod
 " target="_blank">[E4E-jittor]</a> and DeepFaceVideoEditing weights <a href="https://drive.google.com/drive/folders/15g31av5zR3H0BBaaksmrHhTDGhhwD4gS?usp=sharing
 " target="_blank">[Google Drive]</a>. Put the weights into `./weights/`
 
-## Video Editing
-Download examples from </a><a href="https://drive.google.com/drive/folders/1MzSDIeu_QnirTNqrG7JyUKxzz0n9Rtj7?usp=sharing
-" target="_blank">[Google Drive]</a>. Unzip it and put the video directories in `./video_editings/`. 
+## Quick Start
+Download examples from </a><a href="https://drive.google.com/drive/folders/1OhlGtzoLUoPhvGLRn6LqNaEoA63SUDNC?usp=sharing
+" target="_blank">[Google Drive]</a>. This Link contains 10 examples which are used in our user study and can be used for further comparsions. Unzip it and put the video directories in `./video_editings/`.
 
 For each video example, the original video and editing operations are organized as the following structure:
 
 ```
 video_editings
 │
-└─── example1
+└─── example2
     └─── XXX.mp4
     └─── edit
          └─── baseShape
@@ -77,7 +77,19 @@ video_editings
     └─── ...
 ```
 
-**Modify the `./configs/paths_config.py`**: change the `input_video_path` to video example directory and `video_name` to the name of input video. (Default settings are for example1)
+### Running video editing examples
+Edit example2 with 3 editing operations. Results are saved as **merge.mp4**: 
+
+  ```
+  ./video_editings/example2/running_script/edit_video.sh
+  ```
+
+Other examples can be edited in the similar way by replacing the 'example2' with other directory. 
+
+## Video Editing
+The following describes the details of video editing. 
+
+**Modify the `./configs/paths_config.py`**: change the `input_video_path` to video example directory and `video_name` to the name of input video. (Default settings are for example2)
 
 ### Preprocess videos
 Extract and align all frames from input video. 
@@ -99,28 +111,24 @@ PTI weights will be generated in example directory and pti results for 1st frame
 
 ### Sketch editing
 
-Generate the sketch editing results for single frame. 
+Generate sketch optimization results for single frame:
 
-**Modify the `./configs/paths_config.py`**: change the `inversion_edit_path` to sketch editing directory which contains image, sketch and mask. 
+  ```
+  python run_sketch.py --inversion_edit_path XXX
+  ```
+
+Option `--inversion_edit_path` is the sketch editing directory which contains image, sketch and mask. 
 
 The edit frame is named `img.jpg`, drawn sketch is named `sketch_edit.jpg` and drawn mask is named `mask_edit.jpg`. 
 
-Then, generate sketch optimization results: 
-
-  ```
-  python run_sketch.py
-  ```
-
-The edited results will be generated in `inversion_edit_path` directory, including `initial_w.pkl`, `refine_w.pkl`, `refine.jpg` and `mask_fusion_result.jpg`. 
-
 Note:
 
--- The sketch weights and RGB weights could be tuned in `./configs/hyperparameters.py` to generate the better results. 
+-- The sketch weights and RGB weights could be tuned to generate the best results. 
 
--- And for each editing operations, this script should be run again with different `./configs/paths_config.py`. For example, this script should be run 3 times if 3 editing operations are applied for a single video. Please read the `readme.txt` for each example. 
+-- For each editing operations, this script should be run with different `--inversion_edit_path`. For example, this script should be run 3 times if 3 editing operations are applied for a single video. 
 
 ### Editing propagation
-Before propagating the editing effect, the editing vectors should be generated using the above approach. 
+Before propagating the editing effect, the editing vectors should be generated using the above script. 
 
 **Modify the `./configs/paths_config.py`**, corresponding to 3 directories in `./video_editings/exampleXXX/edit/`.
 

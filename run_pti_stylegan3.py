@@ -40,4 +40,3 @@ def run_PTI(run_name='', use_wandb=False, use_multi_id_training=False):
 if __name__ == '__main__':
     run_PTI(run_name='', use_wandb=False, use_multi_id_training=True)
 
-

@@ -10,7 +10,7 @@ import cv2
 import threading
 import time
 from tqdm import tqdm
-
+from argparse import ArgumentParser
 from configs import global_config, paths_config, hyperparameters
 
 jt.flags.use_cuda = 1
@@ -56,7 +56,7 @@ class SoftDilate(nn.Module):
         return x, y
 
 class MaskMaster(nn.Module):
-    def __init__(self):
+    def __init__(self, args):
         super(MaskMaster, self).__init__()
         ## face parsing net
         n_classes = 19
@@ -69,16 +69,19 @@ class MaskMaster(nn.Module):
         transform.ImageNormalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
+        self.merge_neck = args.merge_neck
+        self.merge_hair = args.merge_hair
+
     def encode_segmentation_rgb(self, segmentation, no_neck=True):
         parse = segmentation
         ###     1        2         3        4        5        6        7        8        9       10      11       12       13       14       15       16      17      18
         ### ['skin', 'l_brow', 'r_brow', 'l_eye', 'r_eye', 'eye_g', 'l_ear', 'r_ear', 'ear_r', 'nose', 'mouth', 'u_lip', 'l_lip', 'neck', 'neck_l', 'cloth', 'hair', 'hat']
         #face_part_ids = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13]
         face_part_ids = [1, 2, 3, 4, 5, 6, 10, 12, 13]
-        if hyperparameters.merge_neck:
+        if self.merge_neck:
             face_part_ids.append(14)
             face_part_ids.append(15)
-        if hyperparameters.merge_hair:
+        if self.merge_hair:
             face_part_ids.append(17)
         
         mouth_id = 11
@@ -196,7 +199,7 @@ class face_projector(nn.Module):
         start = time.time()
         merged_mask = self.smooth_npmask(merged_mask, self.smooth_mask_class)
         end = time.time()
-        print('smooth: ', end - start)
+        #print('smooth: ', end - start)
 
         start = time.time()
         merged_mask = merged_mask.astype(np.float32) * (mask_bg_np.astype(np.float32)/255.)
@@ -218,7 +221,7 @@ class face_projector(nn.Module):
         ### align ###
         img_return = self.realignment(pil_img, width, height, coeffs, unpad, top, bottom, left, right)
         end = time.time()
-        print('realign: ', end - start)
+        #print('realign: ', end - start)
 
         merged_pil = PIL.Image.fromarray(merged_mask).resize((1024,1024))
         #print(width, " ", height)
@@ -302,7 +305,12 @@ gen_parsing_list = []
 ori_parsing_list = []
 trans_params_dict_load = {}
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument("--merge_hair", type=bool, default = False, help = "merge hair or not")
+    parser.add_argument("--merge_neck", type=bool, default = False, help = "merge neck or not")
+    args = parser.parse_args()
+    
     #*********************************************************************************************
     ####-----------------transformback------------------------
     video_dir = paths_config.input_video_path
@@ -327,7 +335,7 @@ if __name__ == '__main__':
     trans_params_dict_load = np.load(trans_params_dict_path, allow_pickle=True).item()
     
     ####-----------------Gen mask------------------------
-    MaskMaster = MaskMaster()
+    MaskMaster = MaskMaster(args)
     for i in tqdm(range(len(img_ori_paths))):
         img_name = os.path.basename(img_ori_paths[i])
         pilimg_align = PIL.Image.open(img_align_paths[i]).convert('RGB')

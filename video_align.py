@@ -44,8 +44,8 @@ if not os.path.exists(os.path.join(video_dir,'edit/window/')):
 # extract frames 
 if not os.path.exists(ori_dir):
     os.mkdir(ori_dir)
-    video_path = os.path.join(video_dir, paths_config.video_name)
-    FrameCapture(video_path, ori_dir)
+video_path = os.path.join(video_dir, paths_config.video_name)
+FrameCapture(video_path, ori_dir)
 
 image_lists = sorted(os.listdir(ori_dir))
 trans_params_dict = {}

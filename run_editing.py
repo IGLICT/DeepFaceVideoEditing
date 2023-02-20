@@ -158,11 +158,12 @@ if __name__ == '__main__':
         mask_image_list.append(os.path.join(expPath, expPath_list[0], 'mask_edit.jpg'))
         mask_warps_list.append(os.path.join(expPath, expPath_list[0], 'mask_warp'))
     
-    use_warp = False
+    #use_warp = False
+    use_warp = True
     for mask_count in range(len(mask_image_list)):
         if not os.path.exists(mask_warps_list[mask_count]):
             os.makedirs(mask_warps_list[mask_count])
-            use_warp = True
+    #        use_warp = True
     if use_warp:
         # Warp mask
         generator, kp_detector = load_checkpoints(config_path='./modules/first_order/config/vox-256.yaml', 
@@ -297,20 +298,20 @@ if __name__ == '__main__':
             w_vector = window_vectors[i_window]
             if im_name >= (edit_frame - lasting_frame - window_frame) and im_name <= (edit_frame + lasting_frame + window_frame):
                 if im_name > edit_frame - lasting_frame and im_name < edit_frame + lasting_frame:
-                    print("lasting window")
+                    #print("lasting window")
                     w_edit = w_vector
                 elif im_name <= edit_frame - lasting_frame:
-                    print("generating window")
+                    #print("generating window")
                     rate = 1.0 - float(abs(im_name - (edit_frame - lasting_frame))/window_frame)
                     w_edit = w_vector * rate
                 else:
-                    print("ending window")
+                    #print("ending window")
                     rate = 1.0 - float(abs((edit_frame + lasting_frame) - im_name)/window_frame)
                     w_edit = w_vector * rate
   
                 w_edit = w_pivot + w_edit
                 #w_edit[:, 10:17, :] = w_pivot_first_frame[:, 10:17, :]
-                 
+                
                 x_list, img = stylegan_G.synthesis.execute_lists(w_edit , noise_mode='const')
                 x_lists.append(x_list)
                 mask_edit = read_img(window_mask_paths[i_window] + window_mask_names[i_window][im_name], 512)

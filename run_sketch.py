@@ -80,7 +80,15 @@ class E4E:
         return w
 
 if __name__ == "__main__":
-    edit_path = os.path.join(paths_config.input_video_path, paths_config.inversion_edit_path)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--edit_sketch_path", type=str, default = "edit/baseShape/edit1/", help = "the path of edit sketch")
+    parser.add_argument("--sketch_weight", type=float, default = 20.0, help = "the weight of sketch loss")
+    parser.add_argument("--image_weight", type=float, default = 20.0, help = "the weight of image loss")
+    parser.add_argument("--optimize_steps", type=int, default = 100, help = "the steps of optimization")
+    parser.add_argument("--use_scp", type=bool, default = True, help = "use scp model or not")
+    args = parser.parse_args()
+
+    edit_path = os.path.join(paths_config.input_video_path, args.edit_sketch_path)
     mask = read_img(os.path.join(edit_path, 'mask_edit.jpg'), 512)
     sketch = read_img(os.path.join(edit_path, 'sketch_edit.jpg'), 512)
     img = read_img(os.path.join(edit_path, 'img.jpg'), 256)
@@ -99,7 +107,7 @@ if __name__ == "__main__":
     net = scp(opts)
     net.eval()
     
-    if hyperparameters.use_scp:
+    if args.use_scp:
         sketch_scp = jt.nn.interpolate(sketch, [256, 256])
         sketch_scp = sketch_scp[:,0:1,:,:]
         mask_scp = jt.nn.interpolate(mask, [256, 256])
@@ -124,9 +132,10 @@ if __name__ == "__main__":
     #w_noise = jt.randn_like(initial_w) * hyperparameters.w_noise_scale
     #initial_w = initial_w + w_noise
 
-    w_refine = w_projector_sketch.project(G, target=img, target_sketch=sketch, target_mask=mask, initial_w=initial_w, num_steps=hyperparameters.optimize_steps)
+    w_refine = w_projector_sketch.project(G, target=img, target_sketch=sketch, target_mask=mask, initial_w=initial_w, \
+                                             sketch_weight=args.sketch_weight, image_weight=args.image_weight, num_steps=args.optimize_steps)
     img_refine = G.synthesis(w_refine)
-    save_img(img_refine, os.path.join(edit_path, 'refine.jpg'))
+    #save_img(img_refine, os.path.join(edit_path, 'refine.jpg'))
 
     save_path = os.path.join(edit_path, 'refine_w.pkl')
     jt.save(w_refine, save_path)
